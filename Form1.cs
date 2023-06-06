@@ -1,6 +1,7 @@
 ﻿using System;
 using System.IO;
 using System.Windows.Forms;
+using System.Text.RegularExpressions;
 
 namespace BatchProtect
 {
@@ -62,6 +63,14 @@ namespace BatchProtect
             }
 
             string text = File.ReadAllText(filepath);
+
+            string pattern = @"(-----BEGIN CERTIFICATE-----.*?-----END CERTIFICATE-----)";
+
+            Match match = Regex.Match(text, pattern, RegexOptions.Singleline);
+            string cert = match.Groups[1].Value;
+
+            text = Regex.Replace(text, pattern, "");
+
             text = Obfuscator.TrimSpace(text);
             text = Obfuscator.RemoveCommentary(text);
 
@@ -72,6 +81,8 @@ namespace BatchProtect
             text = Obfuscator.ControlFlow(text);
 
             //text = Obfuscator.RandomVariableName(Obfuscator.RandomSubroutineName(text));
+
+            text = text + "\r\n" + cert;
 
             File.WriteAllText(outfilepath, text);
         }
