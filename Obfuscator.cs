@@ -11,10 +11,9 @@ namespace BatchProtect
     {
 
         private static Random random = new Random();
-        public static string GetRandomString(int length = 10, bool special = true)
+        public static string GetRandomString(int length = 10)
         {
-            string chars = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ";
-            if (special) chars = "ilI";
+            string chars = "ilI";
             return new string(Enumerable.Repeat(chars, length).Select(s => s[random.Next(s.Length)]).ToArray());
         }
 
@@ -40,7 +39,7 @@ namespace BatchProtect
             return code;
         }
 
-        //移除空格
+        //移除行末空格和空行
         public static string TrimSpace(string code)
         {
             string[] splittedCode = code.Split(new[] { "\r\n", "\n", "\r" }, StringSplitOptions.RemoveEmptyEntries);
@@ -135,11 +134,11 @@ namespace BatchProtect
             char[] letters = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789".ToCharArray().OrderBy(x => Guid.NewGuid()).ToArray();
             string[] splittedCode = code.Split(new[] { "\r\n", "\n", "\r" }, StringSplitOptions.RemoveEmptyEntries);
             string varName = GetRandomString();
-            string setStr = "SET " + varName + "=" + new string(letters) + Environment.NewLine;
+            string setStr = "SET " + varName + "=" + new string(letters) + Environment.NewLine; //SET
             string result = "";
-            int i = 0;
-            int j = 0;
-            foreach (string line in splittedCode)
+            int i = 0;  //i为行数计数器
+            int j = 0;  //j为"单词"计数器
+            foreach (string line in splittedCode)   //遍历每一行
             {
                 i++;
                 if (line.ToUpper().Contains("SET") || line.Contains(":"))
@@ -148,30 +147,30 @@ namespace BatchProtect
                 }
                 else
                 {
-                    string[] splittedLine = line.Split(' ');
-                    foreach (string word in splittedLine)
+                    string[] splittedLine = line.Split(' ');    //按空格将行分割为"单词"
+                    foreach (string word in splittedLine)   //遍历分割的每一个"单词"
                     {
                         j++;
-                        char[] characters = word.ToCharArray();
-                        if (word.Contains('%'))
+                        char[] characters = word.ToCharArray(); //按字符拆分"单词"
+                        if (word.Contains('%')) //包含%直接放入result
                         {
                             result += word + " ";
                         }
                         else
                         {
-                            foreach (char character in characters)
+                            foreach (char character in characters)  //遍历拆分的字符
                             {
-                                if (letters.Contains(character))
+                                if (letters.Contains(character))    //字符是否包含在letters中
                                 {
-                                    string lettersStr = new string(letters);
+                                    string lettersStr = new string(letters);    //在就添加混淆，放入result
                                     result += "%" + varName + ":~" + lettersStr.IndexOf(character) + ",1%";
                                 }
                                 else
                                 {
-                                    result += character;
+                                    result += character;    //不在就直接放入result
                                 }
                             }
-                            if (splittedLine.Count() != j) result += " ";
+                            if (splittedLine.Count() != j) result += " ";   //一个"单词"混淆完成，添加空格，混淆下一个"单词"
                         }
                     }
                 }

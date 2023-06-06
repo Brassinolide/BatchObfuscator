@@ -47,6 +47,7 @@ namespace BatchProtect
         private void button1_Click(object sender, EventArgs e)
         {
             filepath = SelectFile();
+            if (filepath == "") return;
             outfilepath = filepath.Substring(0, filepath.LastIndexOf(".bat")) + "-obf.bat";
             textBox2.Text = outfilepath;
             textBox1.Text = filepath;
@@ -65,8 +66,8 @@ namespace BatchProtect
             text = Obfuscator.RemoveCommentary(text);
 
             Tuple<string, string> data = Obfuscator.SubstringEncode(text);
-            text = data.Item2;
-            text = data.Item1 + text;
+            text = data.Item2;  //Item2为混淆后的内容
+            text = data.Item1 + text;   //Item1为key
 
             text = Obfuscator.ControlFlow(text);
 
